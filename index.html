@@ -4,66 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffffff">
-<meta name="description" content="NETRA — a cybersecurity concept for seeing, detecting, and securing digital environments.">
+<meta name="description" content="NETRA — See. Detect. Secure.">
 <title>NETRA — See. Detect. Secure.</title>
 <style>
-:root{color-scheme:light;--navy:#092c63;--blue:#2878cf;--sky:#e9f5ff;--line:#c9e5fb;--muted:#5d7692}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#fff;color:var(--navy);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
-main{min-height:100vh;position:relative;isolation:isolate;display:flex;flex-direction:column}
-.grid-bg{position:absolute;inset:0;z-index:-2;pointer-events:none;background-image:linear-gradient(#dceefb55 1px,transparent 1px),linear-gradient(90deg,#dceefb55 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,transparent,black 18%,black 78%,transparent)}
-.orbit{position:absolute;z-index:-1;width:min(68vw,760px);aspect-ratio:1;border:1px solid #d7edfc;border-radius:50%;left:50%;top:48%;transform:translate(-50%,-50%);pointer-events:none}
-.orbit:before,.orbit:after{content:"";position:absolute;border:1px solid #e4f3ff;border-radius:50%;inset:9%}.orbit:after{inset:20%}
-header{width:min(1160px,92%);margin:auto;min-height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5f1fa}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.22em;font-size:15px}.brand svg{width:30px;height:30px}
-.status{font-size:10px;letter-spacing:.19em;color:#6485a7;display:flex;align-items:center;gap:9px}.dot{width:7px;height:7px;background:#38a4e8;border-radius:50%;box-shadow:0 0 0 4px #dff2ff}
-.hero{width:min(1160px,92%);margin:auto;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:36px;padding:70px 0 58px;flex:1}
-.eyebrow{font-size:11px;letter-spacing:.23em;font-weight:750;color:#3c8acb;display:flex;align-items:center;gap:10px}.eyebrow:before{content:"";width:28px;height:1px;background:#3c8acb}
-h1{font-size:clamp(76px,11vw,144px);line-height:.9;letter-spacing:.055em;margin:25px 0 19px;font-weight:850;color:var(--navy)}
-.tagline{font-size:13px;letter-spacing:.27em;font-weight:750;color:#367fc0}.desc{font-size:17px;line-height:1.75;color:var(--muted);max-width:470px;margin:24px 0 29px}
-.actions{display:flex;gap:13px;align-items:center;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;text-decoration:none;border-radius:5px;font-size:12px;font-weight:750;letter-spacing:.06em;transition:transform .2s,background .2s}.btn:hover{transform:translateY(-2px)}.primary{background:var(--navy);color:white;box-shadow:0 8px 22px #092c6322}.secondary{border:1px solid #c6e2f7;color:var(--navy);background:#ffffffc9}
-.visual{position:relative;min-height:400px;display:grid;place-items:center}.scanner{width:min(100%,430px);aspect-ratio:1;position:relative;display:grid;place-items:center}
-.ring{position:absolute;border:1px solid #b7dcf6;border-radius:50%;inset:3%;animation:rotate 40s linear infinite}.ring.r2{inset:13%;border-style:dashed;animation-direction:reverse;animation-duration:65s}.ring.r3{inset:25%;border-color:#d7edfc}
-.cross{position:absolute;background:#d6ebfa}.cross.x{height:1px;width:100%;left:0;top:50%}.cross.y{width:1px;height:100%;top:0;left:50%}
-.eye{width:44%;z-index:2;filter:drop-shadow(0 8px 20px #2c83c522)}.orb-label{position:absolute;font-size:9px;letter-spacing:.14em;color:#578bb8;background:#ffffffdd;padding:7px 9px;border:1px solid #d8ecfa;border-radius:3px}.l1{top:13%;left:-1%}.l2{top:24%;right:-2%}.l3{bottom:15%;left:1%}.l4{bottom:9%;right:0}
-.node{position:absolute;width:8px;height:8px;border:2px solid #4da1df;background:white;border-radius:50%;box-shadow:0 0 0 5px #dff2ff}.n1{top:17%;right:20%}.n2{bottom:22%;left:18%}
-.features{width:min(1160px,92%);margin:0 auto 40px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #dceefa;border-bottom:1px solid #dceefa}
-.feature{padding:21px 23px;display:flex;gap:14px;align-items:flex-start}.feature+.feature{border-left:1px solid #dceefa}.ficon{flex:0 0 38px;width:38px;height:38px;border:1px solid #cbe6fa;background:#f5fbff;border-radius:9px;display:grid;place-items:center}.ficon svg{width:20px;height:20px;stroke:#3789cb;fill:none;stroke-width:1.6}.feature h2{font-size:13px;margin:1px 0 6px}.feature p{font-size:11px;line-height:1.6;color:var(--muted);margin:0}
-footer{width:min(1160px,92%);margin:0 auto;padding:0 0 23px;display:flex;justify-content:space-between;gap:15px;font-size:9px;letter-spacing:.12em;color:#7893ac}
-@keyframes rotate{to{transform:rotate(360deg)}}
-@media(max-width:760px){.hero{grid-template-columns:1fr;padding:55px 0 28px;gap:12px}.hero-copy{text-align:center}.eyebrow{justify-content:center}h1{font-size:clamp(78px,20vw,120px)}.desc{margin:20px auto 25px;font-size:15px}.actions{justify-content:center}.visual{min-height:300px}.scanner{width:min(80vw,340px)}.features{grid-template-columns:1fr;margin-bottom:28px}.feature{padding:16px}.feature+.feature{border-left:0;border-top:1px solid #dceefa}.orbit{top:55%;width:95vw}footer{flex-direction:column;text-align:center;line-height:1.6}.status{font-size:8px;letter-spacing:.08em}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#fff}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center}
+main{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center}
+img{display:block;width:100%;height:auto;max-height:100vh;object-fit:contain}
+@media(max-aspect-ratio:16/9){img{width:100%;height:auto}}
 </style>
 </head>
 <body>
-<main id="top">
-<div class="grid-bg" aria-hidden="true"></div><div class="orbit" aria-hidden="true"></div>
-<header>
-<a class="brand" href="#top" aria-label="NETRA home"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M3 20S9 9 20 9s17 11 17 11-6 11-17 11S3 20 3 20Z" stroke="#1c76bd" stroke-width="2"/><circle cx="20" cy="20" r="6" stroke="#1c76bd" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#1c76bd"/></svg>NETRA</a>
-<div class="status"><span class="dot"></span> CYBERSECURITY CONCEPT</div>
-</header>
-<section class="hero" aria-labelledby="main-title">
-<div class="hero-copy">
-<div class="eyebrow">CYBERSECURITY PLATFORM</div>
-<h1 id="main-title">NETRA</h1>
-<div class="tagline">SEE <span aria-hidden="true">·</span> DETECT <span aria-hidden="true">·</span> SECURE</div>
-<p class="desc">A clearer view of your digital world. Explore a security-first concept designed around visibility, intelligent analysis, and safer digital environments.</p>
-<div class="actions"><a class="btn primary" href="#about">EXPLORE NETRA <span aria-hidden="true">↗</span></a><a class="btn secondary" href="#capabilities">DISCOVER THE CONCEPT</a></div>
-</div>
-<div class="visual" aria-label="Decorative cybersecurity-inspired eye and scanning interface">
-<div class="scanner">
-<div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><div class="cross x"></div><div class="cross y"></div>
-<svg class="eye" viewBox="0 0 200 150" fill="none" aria-hidden="true"><path d="M10 75S42 22 100 22s90 53 90 53-32 53-90 53S10 75 10 75Z" fill="#eaf6ff" stroke="#176eb4" stroke-width="3"/><circle cx="100" cy="75" r="31" fill="#fff" stroke="#176eb4" stroke-width="3"/><circle cx="100" cy="75" r="19" fill="#d9efff" stroke="#176eb4" stroke-width="2"/><circle cx="100" cy="75" r="9" fill="#0a3c75"/><circle cx="106" cy="68" r="4" fill="#fff"/><path d="M100 44v-9M100 115v-9M69 75h-9M140 75h-9" stroke="#55a8e1" stroke-width="2"/></svg>
-<span class="orb-label l1">SIGNAL SCAN / 01</span><span class="orb-label l2">ANALYSIS / 02</span><span class="orb-label l3">VISIBILITY / 03</span><span class="orb-label l4">NETRA SYSTEM</span><i class="node n1"></i><i class="node n2"></i>
-</div>
-</div>
-</section>
-<section class="features" id="capabilities" aria-label="Concept pillars">
-<article class="feature"><div class="ficon"><svg viewBox="0 0 24 24"><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></div><div><h2>Threat Visibility</h2><p>A concept focused on making security signals easier to notice and understand.</p></div></article>
-<article class="feature"><div class="ficon"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M10.5 7v7M7 10.5h7"/></svg></div><div><h2>Intelligent Analysis</h2><p>A foundation for examining patterns and helping people make informed decisions.</p></div></article>
-<article class="feature"><div class="ficon"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg></div><div><h2>Safer Digital Spaces</h2><p>Security-minded design that puts awareness and protection at the center.</p></div></article>
-</section>
-<section id="about" style="width:min(900px,92%);margin:0 auto 42px;text-align:center;scroll-margin-top:20px"><p class="eyebrow" style="justify-content:center">ABOUT THE PROJECT</p><p style="max-width:680px;margin:14px auto 0;color:var(--muted);font-size:14px;line-height:1.8">NETRA is the starting point for a cybersecurity website. This page is a visual landing-page concept; live monitoring, threat detection, and analytics are not connected to a backend yet.</p></section>
-<footer><span>NETRA · CYBERSECURITY CONCEPT</span><span>DESIGNED FOR CLARITY. BUILT FOR A SAFER DIGITAL FUTURE.</span></footer>
+<main>
+<img src="./i1.png" alt="NETRA — See, Detect, Secure. Cybersecurity concept banner.">
 </main>
 </body>
 </html>
