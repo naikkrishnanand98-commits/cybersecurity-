@@ -10,14 +10,79 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:#fff}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center}
-main{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center}
-img{display:block;width:100%;height:auto;max-height:100vh;object-fit:contain}
-@media(max-aspect-ratio:16/9){img{width:100%;height:auto}}
+main{position:relative;width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.hero-image{display:block;width:100%;height:auto;max-height:100vh;object-fit:contain}
+.auth-options{position:absolute;top:66%;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:14px;width:max-content;max-width:92%;z-index:2}
+.auth-button{min-width:128px;padding:12px 24px;border-radius:6px;border:1px solid #0b3b72;background:#0b3b72;color:#fff;font:700 14px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.04em;text-align:center;text-decoration:none;box-shadow:0 5px 18px #092c6325;cursor:pointer;transition:transform .18s,background .18s}
+.auth-button:hover{transform:translateY(-2px);background:#17558f}
+.auth-button.signup{background:#fff;color:#0b3b72}
+.auth-button.signup:hover{background:#eef7ff}
+.auth-note{position:absolute;top:calc(66% + 54px);left:50%;transform:translateX(-50%);font:11px/1.4 system-ui,sans-serif;color:#55728f;text-align:center;max-width:90%;margin:0}
+.dialog-backdrop{position:fixed;inset:0;z-index:10;background:#061a35a8;display:none;align-items:center;justify-content:center;padding:20px}
+.dialog-backdrop.open{display:flex}
+.dialog{width:min(390px,100%);background:#fff;border:1px solid #d8e9f7;border-radius:14px;padding:26px;box-shadow:0 20px 70px #00132d40;color:#0b2f60;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dialog h2{font-size:23px;margin:0}
+.close{border:0;background:#eef6fc;color:#173f69;border-radius:7px;width:34px;height:34px;font-size:22px;cursor:pointer}
+.dialog p{font-size:13px;color:#58728c;line-height:1.5}
+.dialog label{display:block;font-size:12px;font-weight:700;margin:14px 0 6px}
+.dialog input{width:100%;padding:11px 12px;border:1px solid #c8dceb;border-radius:7px;font:14px system-ui,sans-serif}
+.dialog .submit{width:100%;margin-top:18px;padding:12px;border:0;border-radius:7px;background:#0b3b72;color:#fff;font-weight:700;cursor:pointer}
+.notice{font-size:11px!important;background:#f0f7fc;padding:10px;border-radius:7px}
+@media(max-width:600px){.auth-options{top:66%;gap:8px}.auth-button{min-width:110px;padding:11px 15px;font-size:12px}.auth-note{top:calc(66% + 48px);font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <main>
-<img src="./i1.png" alt="NETRA — See, Detect, Secure. Cybersecurity concept banner.">
+<img class="hero-image" src="./i1.png" alt="NETRA — See, Detect, Secure cybersecurity landing-page artwork">
+<div class="auth-options" aria-label="Account options">
+<button class="auth-button" type="button" data-open="login">Log In</button>
+<button class="auth-button signup" type="button" data-open="signup">Sign Up</button>
+</div>
+<p class="auth-note">Account access preview · Authentication is not connected yet</p>
 </main>
+<div class="dialog-backdrop" id="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+<section class="dialog">
+<div class="dialog-head"><h2 id="dialog-title">Log In</h2><button class="close" type="button" aria-label="Close dialog">×</button></div>
+<p id="dialog-description">Enter your details to preview the NETRA account form.</p>
+<form id="auth-form">
+<div id="name-field" hidden><label for="full-name">Full name</label><input id="full-name" name="name" autocomplete="name" placeholder="Your name"></div>
+<label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+<label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
+<button class="submit" type="submit" id="submit-label">Continue</button>
+</form>
+<p class="notice">Demo interface only: no account is created and no credentials are sent or stored. A secure authentication backend must be connected before real use.</p>
+</section>
+</div>
+<script>
+(() => {
+ const backdrop=document.getElementById('auth-dialog');
+ const title=document.getElementById('dialog-title');
+ const desc=document.getElementById('dialog-description');
+ const nameField=document.getElementById('name-field');
+ const form=document.getElementById('auth-form');
+ const submit=document.getElementById('submit-label');
+ function close(){backdrop.classList.remove('open');form.reset();}
+ document.querySelectorAll('[data-open]').forEach(button=>button.addEventListener('click',()=>{
+   const signup=button.dataset.open==='signup';
+   title.textContent=signup?'Sign Up':'Log In';
+   desc.textContent=signup?'Create a NETRA account form preview.':'Enter your details to preview the NETRA login form.';
+   nameField.hidden=!signup;
+   document.getElementById('password').autocomplete=signup?'new-password':'current-password';
+   submit.textContent=signup?'Create account (preview)':'Log in (preview)';
+   backdrop.classList.add('open');
+   (signup?document.getElementById('full-name'):document.getElementById('email')).focus();
+ }));
+ document.querySelector('.close').addEventListener('click',close);
+ backdrop.addEventListener('click',event=>{if(event.target===backdrop)close();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+ form.addEventListener('submit',event=>{
+   event.preventDefault();
+   alert('This is a UI preview only. Authentication is not connected, so no account was created and no data was sent.');
+   close();
+ });
+})();
+</script>
 </body>
 </html>
