@@ -79,8 +79,8 @@ main{position:relative;width:100%;min-height:100vh;display:flex;align-items:cent
  document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
  form.addEventListener('submit',event=>{
    event.preventDefault();
-   alert('This is a UI preview only. Authentication is not connected, so no account was created and no data was sent.');
-   close();
+   alert('Demo sign-in only. No credentials were sent or stored. Opening the NETRA dashboard preview.');
+   window.location.href='./dashboard.html';
  });
 })();
 </script>
