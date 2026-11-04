@@ -29,7 +29,14 @@
 @media(max-width:1050px){.news-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.news-grid{grid-template-columns:1fr}.news-hero{align-items:flex-start;flex-direction:column;padding:19px}.news-hero h1{font-size:23px}}
 
-\n.account-view{max-width:760px;margin:18px auto;background:#fff;border:1px solid var(--line);border-radius:13px;padding:30px;box-shadow:0 2px 8px #164d800b}.account-heading h1{font-size:27px;margin:8px 0}.account-heading p{color:#6488b4;margin:0 0 24px}.account-form{max-width:520px;display:grid;gap:10px}.account-form label{font-weight:700;color:#173e70}.account-form input{width:100%;padding:14px 15px;border:1px solid #b9d5f0;border-radius:8px;font:inherit;color:var(--navy);outline:none}.account-form input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #168cff20}.account-form button{justify-self:start;border:0;border-radius:8px;background:#168cff;color:white;padding:12px 24px;font-weight:700;cursor:pointer}.account-form #account-help,.account-demo-note{font-size:12px;color:#7895b7;margin:0}.account-message{font-size:12px;color:#b66a08;margin:2px 0 0;min-height:16px}\n</style>
+\n.account-view{max-width:760px;margin:18px auto;background:#fff;border:1px solid var(--line);border-radius:13px;padding:30px;box-shadow:0 2px 8px #164d800b}.account-heading h1{font-size:27px;margin:8px 0}.account-heading p{color:#6488b4;margin:0 0 24px}.account-form{max-width:520px;display:grid;gap:10px}.account-form label{font-weight:700;color:#173e70}.account-form input{width:100%;padding:14px 15px;border:1px solid #b9d5f0;border-radius:8px;font:inherit;color:var(--navy);outline:none}.account-form input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #168cff20}.account-form button{justify-self:start;border:0;border-radius:8px;background:#168cff;color:white;padding:12px 24px;font-weight:700;cursor:pointer}.account-form #account-help,.account-demo-note{font-size:12px;color:#7895b7;margin:0}.account-message{font-size:12px;color:#b66a08;margin:2px 0 0;min-height:16px}
+.demo-account-result{margin-top:24px;padding:20px;border:1px solid var(--line);border-radius:10px;background:#f8fbff}
+.demo-account-result h2{margin:0 0 14px;font-size:19px}
+.demo-account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.demo-account-item{padding:13px;background:#fff;border:1px solid #e3eef9;border-radius:8px}
+.demo-account-item small{display:block;color:#7895b7;margin-bottom:5px}
+.demo-account-item strong{color:#173e70;overflow-wrap:anywhere}
+@media(max-width:520px){.demo-account-grid{grid-template-columns:1fr}}\n</style>
 </head>
 <body>
 <header class="topbar">
@@ -68,13 +75,14 @@
 <section class="account-view" id="account-view" hidden>
  <div class="account-heading"><div class="news-kicker">NETRA · Account</div><h1>Enter Account Number</h1><p>Enter your account number to continue to your account details.</p></div>
  <form class="account-form" id="account-form">
-  <label for="account-number">Account Number</label>
-  <input id="account-number" name="accountNumber" type="text" inputmode="numeric" autocomplete="off" placeholder="Enter your account number" required maxlength="24" aria-describedby="account-help">
-  <p id="account-help">Please enter the account number provided to you.</p>
-  <button type="submit">Continue</button>
+  <label for="account-number">Demo Account ID</label>
+  <input id="account-number" name="demoAccountId" type="text" autocomplete="off" placeholder="Try NETRA1001 or NETRA1002" required maxlength="12" aria-describedby="account-help">
+  <p id="account-help">Use one of the fictional demo IDs shown above. Do not enter a real bank account number, PIN, OTP or password.</p>
+  <button type="submit">View Demo Account</button>
   <p class="account-message" id="account-message" role="status" aria-live="polite"></p>
  </form>
- <p class="account-demo-note">Account entry screen preview. Account lookup and verification are not connected to a backend yet.</p>
+ <p class="account-demo-note">Demo mode only. These fictional sample records are stored in this page's code; no real bank service is contacted and the ID you enter is not saved.</p>
+ <section id="demo-account-result" class="demo-account-result" hidden aria-live="polite"></section>
 </section>
 </main></div>
 <script>
@@ -95,7 +103,20 @@ const homeView=document.getElementById('home-view'),accountView=document.getElem
 function showDashboardSection(section){const isAccount=section==='account';homeView.hidden=isAccount;accountView.hidden=!isAccount;document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));document.getElementById(isAccount?'account-link':'home-link').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 document.getElementById('account-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('account');});
 document.getElementById('home-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('home');});
-document.getElementById('account-form').addEventListener('submit',function(e){e.preventDefault();const number=document.getElementById('account-number').value.trim();document.getElementById('account-message').textContent=number?'Account number entered. Account verification will be available once the backend is connected.':'Please enter your account number.';});
+const demoAccounts={
+ NETRA1001:{holder:'Aarav Mehta',masked:'XXXX XXXX 1001',type:'Savings',bank:'NETRA Demo Bank',branch:'Karwar Demo Branch',ifsc:'DEMO0001001',balance:'₹25,400.00',status:'Active',kyc:'Demo verified'},
+ NETRA1002:{holder:'Diya Rao',masked:'XXXX XXXX 1002',type:'Current',bank:'NETRA Demo Bank',branch:'Uttara Kannada Demo Branch',ifsc:'DEMO0001002',balance:'₹58,750.00',status:'Active',kyc:'Demo verified'}
+};
+document.getElementById('account-form').addEventListener('submit',function(e){
+ e.preventDefault();
+ const field=document.getElementById('account-number'),id=field.value.trim().toUpperCase(),message=document.getElementById('account-message'),result=document.getElementById('demo-account-result');
+ const account=demoAccounts[id];
+ if(!account){message.textContent='Demo ID not found. Use NETRA1001 or NETRA1002.';result.hidden=true;return;}
+ message.textContent='Demo record loaded. This is fictional sample information.';
+ const rows=[['Account holder',account.holder],['Account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (demo only)',account.ifsc],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc]];
+ result.innerHTML='<h2>Demo Account Overview</h2><div class="demo-account-grid">'+rows.map(([label,value])=>'<div class="demo-account-item"><small>'+label+'</small><strong>'+value+'</strong></div>').join('')+'</div>';
+ result.hidden=false;
+});
 document.getElementById('user-menu').addEventListener('click',function(){alert('Account menu preview. Real account settings require authentication to be connected.');});
 </script>
 </body>
