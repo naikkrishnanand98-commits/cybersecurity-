@@ -107,15 +107,27 @@ const demoAccounts={
  NETRA1001:{holder:'Aarav Mehta',masked:'XXXX XXXX 1001',type:'Savings',bank:'NETRA Demo Bank',branch:'Karwar Demo Branch',ifsc:'DEMO0001001',balance:'₹25,400.00',status:'Active',kyc:'Demo verified'},
  NETRA1002:{holder:'Diya Rao',masked:'XXXX XXXX 1002',type:'Current',bank:'NETRA Demo Bank',branch:'Uttara Kannada Demo Branch',ifsc:'DEMO0001002',balance:'₹58,750.00',status:'Active',kyc:'Demo verified'}
 };
-document.getElementById('account-form').addEventListener('submit',function(e){
+const accountHeading=document.querySelector('.account-heading');
+const accountForm=document.getElementById('account-form');
+const accountDemoNote=document.querySelector('.account-demo-note');
+accountForm.addEventListener('submit',function(e){
  e.preventDefault();
  const field=document.getElementById('account-number'),id=field.value.trim().toUpperCase(),message=document.getElementById('account-message'),result=document.getElementById('demo-account-result');
  const account=demoAccounts[id];
  if(!account){message.textContent='Demo ID not found. Use NETRA1001 or NETRA1002.';result.hidden=true;return;}
- message.textContent='Demo record loaded. This is fictional sample information.';
  const rows=[['Account holder',account.holder],['Account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (demo only)',account.ifsc],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc]];
- result.innerHTML='<h2>Demo Account Overview</h2><div class="demo-account-grid">'+rows.map(([label,value])=>'<div class="demo-account-item"><small>'+label+'</small><strong>'+value+'</strong></div>').join('')+'</div>';
+ result.innerHTML='<h2>Demo Account Overview</h2><p style="color:#6488b4;margin:0 0 16px">Fictional sample account details for demonstration only.</p><div class="demo-account-grid">'+rows.map(([label,value])=>'<div class="demo-account-item"><small>'+label+'</small><strong>'+value+'</strong></div>').join('')+'</div><button type="button" id="back-to-account-entry" style="margin-top:18px;border:0;border-radius:8px;background:#168cff;color:#fff;padding:11px 20px;font-weight:700;cursor:pointer">Back to Account Entry</button>';
+ accountHeading.querySelector('h1').textContent='Account Overview';
+ accountHeading.querySelector('p').textContent='Your demo account details are displayed below.';
+ accountForm.hidden=true;
+ accountDemoNote.hidden=true;
  result.hidden=false;
+ document.getElementById('back-to-account-entry').addEventListener('click',function(){
+  result.hidden=true;accountForm.hidden=false;accountDemoNote.hidden=false;
+  accountHeading.querySelector('h1').textContent='Enter Account Number';
+  accountHeading.querySelector('p').textContent='Enter your account number to continue to your account details.';
+  message.textContent='';
+ });
 });
 document.getElementById('user-menu').addEventListener('click',function(){alert('Account menu preview. Real account settings require authentication to be connected.');});
 </script>
