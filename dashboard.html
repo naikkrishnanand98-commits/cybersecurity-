@@ -160,7 +160,7 @@ function readSavedReports(){try{return JSON.parse(localStorage.getItem(REPORT_ST
 function writeSavedReports(reports){try{localStorage.setItem(REPORT_STORAGE_KEY,JSON.stringify(reports));return true}catch(e){return false}}
 function renderThreats(){
  const list=document.getElementById('threat-list'),reports=readSavedReports(),items=[];
- reports.forEach(report=>(report.threats||[]).forEach(threat=>items.push({...threat,demoId:report.demoId,createdAt:report.createdAt})));
+ reports.filter(report=>report.demoId==='NETRA1002').forEach(report=>(report.threats||[]).forEach(threat=>items.push({...threat,demoId:report.demoId,createdAt:report.createdAt})));
  list.innerHTML='';
  if(!items.length){list.innerHTML='<div class="threat-empty">No flagged transactions found in saved demo reports. Generate an Excel report to run the sample checks.</div>';return;}
  items.slice().reverse().forEach(item=>{
@@ -254,7 +254,7 @@ document.addEventListener('click',function(e){
   const verificationRows=[['Transaction ID','Verification status','Demo risk level','Review reason','Suggested next step'],...transactions.map(t=>[t.id,t.verification,t.risk,t.risk==='Medium'?'Sample rule: amount or payee pattern selected for manual review':'No demo rule triggered','Demo only; do not treat as a real fraud decision'])];
   const statementRows=[['NETRA DEMO ACCOUNT STATEMENT'],['Account holder',account.holder],['Masked account',account.masked],['Statement period','02 Nov 2026 – 10 Nov 2026'],['Generated',stamp],[],['Date & time','Description','Credit (INR)','Debit (INR)','Status','Reference ID'],...transactions.map(t=>[t.date,t.note,t.type==='Credit'?t.amount:'',t.type==='Debit'?t.amount:'',t.status,t.reference])];
   const fileName='NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx';
-  const threats=transactions.filter(t=>t.status==='Successful'&&(t.risk==='Medium'||t.verification==='Flagged for review')).map(t=>({transactionId:t.id,date:t.date,receiver:t.party,amount:t.amount,risk:t.risk,verification:t.verification,reason:t.note,fileName}));
+  const threats=id==='NETRA1002'?transactions.filter(t=>t.risk==='Medium'||t.verification==='Flagged for review'||t.verification==='Under review').map(t=>({transactionId:t.id,date:t.date,receiver:t.party,amount:t.amount,risk:t.risk,verification:t.verification,reason:t.note,fileName})):[];
   const report={demoId:id,createdAt:stamp,fileName,threats,sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Highest Amount Paid':highestPaidRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
   const saved=readSavedReports();saved.push(report);
   if(!writeSavedReports(saved)){message.textContent='Could not save report in this browser. Browser storage may be full or disabled.';return;}
