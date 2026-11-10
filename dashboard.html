@@ -47,6 +47,7 @@
 @media(max-width:600px){.report-card{align-items:flex-start;flex-direction:column}}
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <header class="topbar">
@@ -152,9 +153,19 @@ function readSavedReports(){try{return JSON.parse(localStorage.getItem(REPORT_ST
 function writeSavedReports(reports){try{localStorage.setItem(REPORT_STORAGE_KEY,JSON.stringify(reports));return true}catch(e){return false}}
 function createExcelFile(report){
  const rows=[['NETRA Demo Account Report'],['Generated',report.createdAt],[],['Field','Value'],...report.rows];
- const csv='\\uFEFF'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
- const blob=new Blob([csv],{type:'application/vnd.ms-excel;charset=utf-8;'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=report.fileName.replace(/\\.xlsx$/i,'.xls');document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ let blob,fileName=report.fileName;
+ if(window.XLSX){
+  const workbook=window.XLSX.utils.book_new();
+  const sheet=window.XLSX.utils.aoa_to_sheet(rows);
+  window.XLSX.utils.book_append_sheet(workbook,sheet,'Account Report');
+  const bytes=window.XLSX.write(workbook,{bookType:'xlsx',type:'array'});
+  blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+ }else{
+  const csv='\\uFEFF'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+  blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  fileName=report.fileName.replace(/\\.xlsx$/i,'.csv');
+ }
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 function renderSavedReports(){
  const list=document.getElementById('saved-report-list'),reports=readSavedReports();list.innerHTML='';
