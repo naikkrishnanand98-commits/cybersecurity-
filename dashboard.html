@@ -152,20 +152,24 @@ const REPORT_STORAGE_KEY='netraSavedDemoReports';
 function readSavedReports(){try{return JSON.parse(localStorage.getItem(REPORT_STORAGE_KEY)||'[]')}catch(e){return []}}
 function writeSavedReports(reports){try{localStorage.setItem(REPORT_STORAGE_KEY,JSON.stringify(reports));return true}catch(e){return false}}
 function createExcelFile(report){
- const rows=[['NETRA Demo Account Report'],['Generated',report.createdAt],[],['Field','Value'],...report.rows];
  let blob,fileName=report.fileName;
  if(window.XLSX){
   const workbook=window.XLSX.utils.book_new();
-  const sheet=window.XLSX.utils.aoa_to_sheet(rows);
-  window.XLSX.utils.book_append_sheet(workbook,sheet,'Account Report');
+  Object.entries(report.sheets).forEach(([sheetName,rows])=>{
+   const sheet=window.XLSX.utils.aoa_to_sheet(rows);
+   sheet['!cols']=Array.from({length:Math.max(...rows.map(row=>row.length))},(_,i)=>({wch:Math.min(38,Math.max(14,...rows.map(row=>String(row[i]??'').length+2)))}));
+   window.XLSX.utils.book_append_sheet(workbook,sheet,sheetName.slice(0,31));
+  });
   const bytes=window.XLSX.write(workbook,{bookType:'xlsx',type:'array'});
   blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  }else{
-  const csv='\\uFEFF'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+  const sections=[];
+  Object.entries(report.sheets).forEach(([name,rows])=>{sections.push([name],...rows,[]);});
+  const csv='\\uFEFF'+sections.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
   blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   fileName=report.fileName.replace(/\\.xlsx$/i,'.csv');
  }
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function renderSavedReports(){
  const list=document.getElementById('saved-report-list'),reports=readSavedReports();list.innerHTML='';
@@ -183,12 +187,37 @@ document.addEventListener('click',function(e){
  if(e.target&&e.target.id==='save-excel-report'){
   const field=document.getElementById('account-number'),id=field.value.trim().toUpperCase(),account=demoAccounts[id],message=document.getElementById('save-report-message');
   if(!account){message.textContent='Unable to save: demo account not found.';return;}
-  const rows=[['Account holder',account.holder],['Account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (demo only)',account.ifsc],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc]];
   const now=new Date(),stamp=now.toLocaleString('en-IN'),safeDate=now.toISOString().slice(0,10);
-  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Report_'+safeDate+'.xlsx',rows};
+  const transactions=id==='NETRA1001'?[
+   {id:'NTX-1001',date:'2026-11-02 09:15',type:'Credit',amount:8500,method:'UPI',party:'Northstar Services',note:'Demo stipend credit',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-71001'},
+   {id:'NTX-1002',date:'2026-11-03 12:40',type:'Debit',amount:1250,method:'UPI',party:'Harbor Cafe',note:'Demo food payment',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-71002'},
+   {id:'NTX-1003',date:'2026-11-04 16:05',type:'Debit',amount:3200,method:'IMPS',party:'Coastal Supplies',note:'Demo purchase',status:'Successful',verification:'Verified',risk:'Low',reference:'IMPS-DEMO-71003'},
+   {id:'NTX-1004',date:'2026-11-06 10:20',type:'Credit',amount:5000,method:'NEFT',party:'Demo Payroll',note:'Sample reimbursement',status:'Successful',verification:'Verified',risk:'Low',reference:'NEFT-DEMO-71004'},
+   {id:'NTX-1005',date:'2026-11-07 19:30',type:'Debit',amount:7800,method:'UPI',party:'Unknown Demo Merchant',note:'Unusual amount for demo profile',status:'Pending',verification:'Under review',risk:'Medium',reference:'UPI-DEMO-71005'},
+   {id:'NTX-1006',date:'2026-11-08 08:55',type:'Debit',amount:450,method:'Card',party:'Metro Mart',note:'Demo grocery purchase',status:'Successful',verification:'Verified',risk:'Low',reference:'CARD-DEMO-71006'},
+   {id:'NTX-1007',date:'2026-11-09 14:10',type:'Credit',amount:2100,method:'UPI',party:'Riya Sharma',note:'Sample shared expense refund',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-71007'},
+   {id:'NTX-1008',date:'2026-11-10 11:25',type:'Debit',amount:900,method:'UPI',party:'Book Corner',note:'Demo stationery purchase',status:'Failed',verification:'Not completed',risk:'Low',reference:'UPI-DEMO-71008'}
+  ]:[
+   {id:'NTX-2001',date:'2026-11-02 10:05',type:'Credit',amount:12000,method:'NEFT',party:'Demo Client A',note:'Sample invoice payment',status:'Successful',verification:'Verified',risk:'Low',reference:'NEFT-DEMO-82001'},
+   {id:'NTX-2002',date:'2026-11-03 13:15',type:'Debit',amount:2750,method:'UPI',party:'Office Stationers',note:'Demo office supplies',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-82002'},
+   {id:'NTX-2003',date:'2026-11-04 15:45',type:'Credit',amount:6400,method:'IMPS',party:'Demo Client B',note:'Sample service payment',status:'Successful',verification:'Verified',risk:'Low',reference:'IMPS-DEMO-82003'},
+   {id:'NTX-2004',date:'2026-11-05 18:25',type:'Debit',amount:9800,method:'RTGS',party:'Demo Vendor',note:'Large sample vendor payment',status:'Pending',verification:'Under review',risk:'Medium',reference:'RTGS-DEMO-82004'},
+   {id:'NTX-2005',date:'2026-11-07 09:35',type:'Debit',amount:650,method:'Card',party:'Fuel Point',note:'Demo fuel purchase',status:'Successful',verification:'Verified',risk:'Low',reference:'CARD-DEMO-82005'},
+   {id:'NTX-2006',date:'2026-11-08 12:10',type:'Credit',amount:3200,method:'UPI',party:'Demo Client C',note:'Sample payment received',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-82006'},
+   {id:'NTX-2007',date:'2026-11-09 17:50',type:'Debit',amount:1500,method:'UPI',party:'City Utilities',note:'Demo utility bill',status:'Successful',verification:'Verified',risk:'Low',reference:'UPI-DEMO-82007'},
+   {id:'NTX-2008',date:'2026-11-10 11:40',type:'Debit',amount:2200,method:'UPI',party:'Unlisted Demo Payee',note:'Sample transaction needs review',status:'Successful',verification:'Flagged for review',risk:'Medium',reference:'UPI-DEMO-82008'}
+  ];
+  const completed=transactions.filter(t=>t.status==='Successful'),credits=completed.filter(t=>t.type==='Credit').reduce((s,t)=>s+t.amount,0),debits=completed.filter(t=>t.type==='Debit').reduce((s,t)=>s+t.amount,0),currentBalance=Number(account.balance.replace(/[^0-9.]/g,'')),openingBalance=currentBalance-(credits-debits);
+  const accountRows=[['Field','Demo value'],['Account holder',account.holder],['Masked account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (fictional)',account.ifsc],['Currency','INR'],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc],['Data notice','Entire workbook contains fictional sample data; not a bank statement']];
+  const summaryRows=[['Metric','Value'],['Opening balance (calculated demo value)',openingBalance],['Total successful credits',credits],['Total successful debits',debits],['Pending transaction count',transactions.filter(t=>t.status==='Pending').length],['Failed transaction count',transactions.filter(t=>t.status==='Failed').length],['Transactions flagged for review',transactions.filter(t=>t.verification==='Flagged for review'||t.verification==='Under review').length],['Closing balance (demo account value)',currentBalance],['Currency','INR'],['Period','02 Nov 2026 – 10 Nov 2026']];
+  const historyRows=[['Transaction ID','Date & time','Type','Amount (INR)','Payment method','Other party','Description','Transaction status','Reference ID'],...transactions.map(t=>[t.id,t.date,t.type,t.amount,t.method,t.party,t.note,t.status,t.reference])];
+  const detailRows=[['Transaction ID','Date & time','Type','Amount (INR)','Payment method','Sender / payer','Receiver / payee','Reference ID','Transaction status','Description'],...transactions.map(t=>[t.id,t.date,t.type,t.amount,t.method,t.type==='Credit'?t.party:account.holder,t.type==='Debit'?t.party:account.holder,t.reference,t.status,t.note])];
+  const verificationRows=[['Transaction ID','Verification status','Demo risk level','Review reason','Suggested next step'],...transactions.map(t=>[t.id,t.verification,t.risk,t.risk==='Medium'?'Sample rule: amount or payee pattern selected for manual review':'No demo rule triggered','Demo only; do not treat as a real fraud decision'])];
+  const statementRows=[['NETRA DEMO ACCOUNT STATEMENT'],['Account holder',account.holder],['Masked account',account.masked],['Statement period','02 Nov 2026 – 10 Nov 2026'],['Generated',stamp],[],['Date & time','Description','Credit (INR)','Debit (INR)','Status','Reference ID'],...transactions.map(t=>[t.date,t.note,t.type==='Credit'?t.amount:'',t.type==='Debit'?t.amount:'',t.status,t.reference])];
+  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx',sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
   const saved=readSavedReports();saved.push(report);
   if(!writeSavedReports(saved)){message.textContent='Could not save report in this browser. Browser storage may be full or disabled.';return;}
-  createExcelFile(report);message.textContent='Excel-compatible report downloaded and saved in the Reports page.';
+  createExcelFile(report);message.textContent='Full Excel workbook downloaded and saved in the Reports page. All account and transaction sections are inside the workbook.';
  }
 });
 
