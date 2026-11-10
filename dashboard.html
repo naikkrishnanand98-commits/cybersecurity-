@@ -36,7 +36,17 @@
 .demo-account-item{padding:13px;background:#fff;border:1px solid #e3eef9;border-radius:8px}
 .demo-account-item small{display:block;color:#7895b7;margin-bottom:5px}
 .demo-account-item strong{color:#173e70;overflow-wrap:anywhere}
-@media(max-width:520px){.demo-account-grid{grid-template-columns:1fr}}\n</style>
+@media(max-width:520px){.demo-account-grid{grid-template-columns:1fr}}\n
+.report-view{max-width:1000px;margin:18px auto}
+.report-header{border:1px solid var(--line);border-radius:12px;background:linear-gradient(110deg,#eaf5ff,#fff);padding:24px;margin-bottom:18px}
+.report-header h1{margin:7px 0;font-size:27px}.report-header p{margin:0;color:#6488b4}
+.report-list{display:grid;gap:12px}.report-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.report-card p{margin:5px 0 0;color:#7895b7;font-size:12px}.report-actions{display:flex;gap:8px;flex-wrap:wrap}
+.report-actions button,.save-report-btn{border:0;border-radius:8px;background:#168cff;color:#fff;padding:11px 17px;font-weight:700;cursor:pointer}
+.report-empty{padding:24px;background:#fff;border:1px dashed #b9d5f0;border-radius:10px;color:#7895b7}
+@media(max-width:600px){.report-card{align-items:flex-start;flex-direction:column}}
+
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -55,7 +65,7 @@
 <a href="#threats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-5"/></svg><span>Threats</span></a>
 <a href="#account" id="account-link"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z"/></svg><span>Account</span></a>
 <a href="#analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M9 19V4M14 19v-7M19 19V2M2 22h20"/></svg><span>Analytics</span></a>
-<a href="#reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg><span>Reports</span></a>
+<a href="#reports" id="reports-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg><span>Reports</span></a>
 <a href="#settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z" transform="translate(-1 -1)"/></svg><span>Settings</span></a>
 </nav><div class="sidebar-brand"><svg width="34" height="38" viewBox="0 0 24 28" fill="none" stroke="#6598cf" stroke-width="1.8"><path d="M12 2 21 5v8c0 6-9 12-9 12S3 19 3 13V5Z"/><path d="m8 13 3 3 5-6"/></svg><div>NETRA<small>See · Detect · Secure</small></div></div></aside>
 <main class="main">
@@ -84,8 +94,14 @@
  <p class="account-demo-note">Demo mode only. These fictional sample records are stored in this page's code; no real bank service is contacted and the ID you enter is not saved.</p>
  <section id="demo-account-result" class="demo-account-result" hidden aria-live="polite"></section>
 </section>
+<section class="report-view" id="reports-view" hidden>
+ <div class="report-header"><div class="news-kicker">NETRA · Reports</div><h1>Saved Reports</h1><p>Excel reports created from demo account overviews are listed here on this browser.</p></div>
+ <div class="report-list" id="saved-report-list"><div class="report-empty">No saved reports yet. Open Account, enter a demo ID and choose Save Excel Sheet.</div></div>
+ <p class="account-demo-note" style="margin-top:14px">Reports are stored in this browser only. Clearing browser site data or using another device/browser will remove or hide these saved entries. They are fictional demo records, not bank statements.</p>
+</section>
 </main></div>
 <script>
+
 const newsGrid=document.getElementById('news-grid'),newsUpdated=document.getElementById('news-updated');
 let townStories=[];
 const backupStories=[
@@ -99,10 +115,11 @@ function showTownNews(items){newsGrid.innerHTML='';if(!items.length){newsGrid.in
 async function refreshTownNews(){const rss='https://news.google.com/rss/search?q='+encodeURIComponent('Karwar Karnataka when:7d')+'&hl=en-IN&gl=IN&ceid=IN:en';try{const response=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rss),{cache:'no-store'});if(!response.ok)throw Error('Feed unavailable');const data=await response.json();if(data.status!=='ok'||!Array.isArray(data.items)||!data.items.length)throw Error('No news items');townStories=data.items.slice(0,18).map(item=>({title:item.title,description:(item.description||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180),link:item.link,source:item.author||'Google News publisher',date:new Date(item.pubDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),category:newsCategory(item)}));newsUpdated.textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});showTownNews(townStories)}catch(e){townStories=backupStories;newsUpdated.textContent='Live feed unavailable · Search links available';showTownNews(townStories)}}
 document.querySelectorAll('.news-filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.news-filter').forEach(b=>b.classList.remove('active'));button.classList.add('active');const category=button.dataset.category;showTownNews(category==='all'?townStories:townStories.filter(item=>item.category===category))}));
 refreshTownNews();setInterval(refreshTownNews,15*60*1000);
-const homeView=document.getElementById('home-view'),accountView=document.getElementById('account-view');
-function showDashboardSection(section){const isAccount=section==='account';homeView.hidden=isAccount;accountView.hidden=!isAccount;document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));document.getElementById(isAccount?'account-link':'home-link').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+const homeView=document.getElementById('home-view'),accountView=document.getElementById('account-view'),reportsView=document.getElementById('reports-view');
+function showDashboardSection(section){homeView.hidden=section!=='home';accountView.hidden=section!=='account';reportsView.hidden=section!=='reports';document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));const activeId=section==='account'?'account-link':section==='reports'?'reports-link':'home-link';document.getElementById(activeId).classList.add('active');if(section==='reports')renderSavedReports();window.scrollTo({top:0,behavior:'smooth'});}
 document.getElementById('account-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('account');});
 document.getElementById('home-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('home');});
+document.getElementById('reports-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('reports');});
 const demoAccounts={
  NETRA1001:{holder:'Aarav Mehta',masked:'XXXX XXXX 1001',type:'Savings',bank:'NETRA Demo Bank',branch:'Karwar Demo Branch',ifsc:'DEMO0001001',balance:'₹25,400.00',status:'Active',kyc:'Demo verified'},
  NETRA1002:{holder:'Diya Rao',masked:'XXXX XXXX 1002',type:'Current',bank:'NETRA Demo Bank',branch:'Uttara Kannada Demo Branch',ifsc:'DEMO0001002',balance:'₹58,750.00',status:'Active',kyc:'Demo verified'}
@@ -116,7 +133,7 @@ accountForm.addEventListener('submit',function(e){
  const account=demoAccounts[id];
  if(!account){message.textContent='Demo ID not found. Use NETRA1001 or NETRA1002.';result.hidden=true;return;}
  const rows=[['Account holder',account.holder],['Account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (demo only)',account.ifsc],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc]];
- result.innerHTML='<h2>Demo Account Overview</h2><p style="color:#6488b4;margin:0 0 16px">Fictional sample account details for demonstration only.</p><div class="demo-account-grid">'+rows.map(([label,value])=>'<div class="demo-account-item"><small>'+label+'</small><strong>'+value+'</strong></div>').join('')+'</div><button type="button" id="back-to-account-entry" style="margin-top:18px;border:0;border-radius:8px;background:#168cff;color:#fff;padding:11px 20px;font-weight:700;cursor:pointer">Back to Account Entry</button>';
+ result.innerHTML='<h2>Demo Account Overview</h2><p style="color:#6488b4;margin:0 0 16px">Fictional sample account details for demonstration only.</p><div class="demo-account-grid">'+rows.map(([label,value])=>'<div class="demo-account-item"><small>'+label+'</small><strong>'+value+'</strong></div>').join('')+'</div><div class="report-actions" style="margin-top:18px"><button type="button" class="save-report-btn" id="save-excel-report">Save Excel Sheet</button><button type="button" id="back-to-account-entry" style="border:0;border-radius:8px;background:#168cff;color:#fff;padding:11px 20px;font-weight:700;cursor:pointer">Back to Account Entry</button></div><p id="save-report-message" class="account-message" role="status" aria-live="polite"></p>';
  accountHeading.querySelector('h1').textContent='Account Overview';
  accountHeading.querySelector('p').textContent='Your demo account details are displayed below.';
  accountForm.hidden=true;
@@ -129,6 +146,41 @@ accountForm.addEventListener('submit',function(e){
   message.textContent='';
  });
 });
+
+const REPORT_STORAGE_KEY='netraSavedDemoReports';
+function readSavedReports(){try{return JSON.parse(localStorage.getItem(REPORT_STORAGE_KEY)||'[]')}catch(e){return []}}
+function writeSavedReports(reports){try{localStorage.setItem(REPORT_STORAGE_KEY,JSON.stringify(reports));return true}catch(e){return false}}
+function createExcelFile(report){
+ const rows=[['NETRA Demo Account Report'],['Generated',report.createdAt],[],['Field','Value'],...report.rows];
+ const csv='\\uFEFF'+rows.map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');
+ const blob=new Blob([csv],{type:'application/vnd.ms-excel;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=report.fileName.replace(/\\.xlsx$/i,'.xls');document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function renderSavedReports(){
+ const list=document.getElementById('saved-report-list'),reports=readSavedReports();list.innerHTML='';
+ if(!reports.length){list.innerHTML='<div class="report-empty">No saved reports yet. Open Account, enter a demo ID and choose Save Excel Sheet.</div>';return;}
+ reports.slice().reverse().forEach(report=>{
+  const card=document.createElement('article');card.className='report-card';
+  const info=document.createElement('div'),title=document.createElement('strong'),meta=document.createElement('p');
+  title.textContent=report.fileName;meta.textContent='Demo ID: '+report.demoId+' · Saved: '+report.createdAt;info.append(title,meta);
+  const actions=document.createElement('div');actions.className='report-actions';
+  const download=document.createElement('button');download.type='button';download.textContent='Download Excel';download.addEventListener('click',()=>createExcelFile(report));
+  actions.append(download);card.append(info,actions);list.append(card);
+ });
+}
+document.addEventListener('click',function(e){
+ if(e.target&&e.target.id==='save-excel-report'){
+  const field=document.getElementById('account-number'),id=field.value.trim().toUpperCase(),account=demoAccounts[id],message=document.getElementById('save-report-message');
+  if(!account){message.textContent='Unable to save: demo account not found.';return;}
+  const rows=[['Account holder',account.holder],['Account number',account.masked],['Account type',account.type],['Bank',account.bank],['Branch',account.branch],['IFSC (demo only)',account.ifsc],['Available balance',account.balance],['Account status',account.status],['KYC status',account.kyc]];
+  const now=new Date(),stamp=now.toLocaleString('en-IN'),safeDate=now.toISOString().slice(0,10);
+  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Report_'+safeDate+'.xlsx',rows};
+  const saved=readSavedReports();saved.push(report);
+  if(!writeSavedReports(saved)){message.textContent='Could not save report in this browser. Browser storage may be full or disabled.';return;}
+  createExcelFile(report);message.textContent='Excel-compatible report downloaded and saved in the Reports page.';
+ }
+});
+
 document.getElementById('user-menu').addEventListener('click',function(){alert('Account menu preview. Real account settings require authentication to be connected.');});
 </script>
 </body>
