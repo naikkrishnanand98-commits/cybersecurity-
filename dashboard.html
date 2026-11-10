@@ -46,6 +46,8 @@
 .report-empty{padding:24px;background:#fff;border:1px dashed #b9d5f0;border-radius:10px;color:#7895b7}
 @media(max-width:600px){.report-card{align-items:flex-start;flex-direction:column}}
 
+
+.threat-view{max-width:1000px;margin:18px auto}.threat-header{border:1px solid #f4d6a2;border-radius:12px;background:linear-gradient(110deg,#fff5e5,#fff);padding:24px;margin-bottom:18px}.threat-header h1{margin:7px 0;font-size:27px}.threat-header p{margin:0;color:#8b744f}.threat-list{display:grid;gap:12px}.threat-card{background:#fff;border:1px solid #f1d7b3;border-left:4px solid #e99a25;border-radius:10px;padding:18px}.threat-card h3{margin:0 0 7px;color:#75440b}.threat-meta{color:#7895b7;font-size:12px;line-height:1.7}.threat-empty{padding:24px;background:#fff;border:1px dashed var(--line);border-radius:10px;color:#7895b7}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -63,7 +65,7 @@
 <div class="layout">
 <aside class="sidebar"><nav class="nav" aria-label="Main navigation">
 <a href="#home" class="active" id="home-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/></svg><span>Home</span></a>
-<a href="#threats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-5"/></svg><span>Threats</span></a>
+<a href="#threats" id="threats-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-5"/></svg><span>Threats</span></a>
 <a href="#account" id="account-link"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2Z"/></svg><span>Account</span></a>
 <a href="#analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M9 19V4M14 19v-7M19 19V2M2 22h20"/></svg><span>Analytics</span></a>
 <a href="#reports" id="reports-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg><span>Reports</span></a>
@@ -95,6 +97,10 @@
  <p class="account-demo-note">Demo mode only. These fictional sample records are stored in this page's code; no real bank service is contacted and the ID you enter is not saved.</p>
  <section id="demo-account-result" class="demo-account-result" hidden aria-live="polite"></section>
 </section>
+<section class="threat-view" id="threats-view" hidden>
+ <div class="threat-header"><div class="news-kicker">NETRA · Threat Monitoring</div><h1>Detected Risks</h1><p>Transactions flagged by the sample rules in generated demo reports. These are review indicators, not confirmed fraud findings.</p></div>
+ <div class="threat-list" id="threat-list"><div class="threat-empty">No flagged transactions found in saved demo reports.</div></div>
+</section>
 <section class="report-view" id="reports-view" hidden>
  <div class="report-header"><div class="news-kicker">NETRA · Reports</div><h1>Saved Reports</h1><p>Excel reports created from demo account overviews are listed here on this browser.</p></div>
  <div class="report-list" id="saved-report-list"><div class="report-empty">No saved reports yet. Open Account, enter a demo ID and choose Save Excel Sheet.</div></div>
@@ -116,11 +122,12 @@ function showTownNews(items){newsGrid.innerHTML='';if(!items.length){newsGrid.in
 async function refreshTownNews(){const rss='https://news.google.com/rss/search?q='+encodeURIComponent('Karwar Karnataka when:7d')+'&hl=en-IN&gl=IN&ceid=IN:en';try{const response=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rss),{cache:'no-store'});if(!response.ok)throw Error('Feed unavailable');const data=await response.json();if(data.status!=='ok'||!Array.isArray(data.items)||!data.items.length)throw Error('No news items');townStories=data.items.slice(0,18).map(item=>({title:item.title,description:(item.description||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180),link:item.link,source:item.author||'Google News publisher',date:new Date(item.pubDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),category:newsCategory(item)}));newsUpdated.textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});showTownNews(townStories)}catch(e){townStories=backupStories;newsUpdated.textContent='Live feed unavailable · Search links available';showTownNews(townStories)}}
 document.querySelectorAll('.news-filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.news-filter').forEach(b=>b.classList.remove('active'));button.classList.add('active');const category=button.dataset.category;showTownNews(category==='all'?townStories:townStories.filter(item=>item.category===category))}));
 refreshTownNews();setInterval(refreshTownNews,15*60*1000);
-const homeView=document.getElementById('home-view'),accountView=document.getElementById('account-view'),reportsView=document.getElementById('reports-view');
-function showDashboardSection(section){homeView.hidden=section!=='home';accountView.hidden=section!=='account';reportsView.hidden=section!=='reports';document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));const activeId=section==='account'?'account-link':section==='reports'?'reports-link':'home-link';document.getElementById(activeId).classList.add('active');if(section==='reports')renderSavedReports();window.scrollTo({top:0,behavior:'smooth'});}
+const homeView=document.getElementById('home-view'),accountView=document.getElementById('account-view'),reportsView=document.getElementById('reports-view'),threatsView=document.getElementById('threats-view');
+function showDashboardSection(section){homeView.hidden=section!=='home';accountView.hidden=section!=='account';reportsView.hidden=section!=='reports';threatsView.hidden=section!=='threats';document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));const activeId=section==='account'?'account-link':section==='reports'?'reports-link':section==='threats'?'threats-link':'home-link';document.getElementById(activeId).classList.add('active');if(section==='reports')renderSavedReports();if(section==='threats')renderThreats();window.scrollTo({top:0,behavior:'smooth'});}
 document.getElementById('account-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('account');});
 document.getElementById('home-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('home');});
 document.getElementById('reports-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('reports');});
+document.getElementById('threats-link').addEventListener('click',function(e){e.preventDefault();showDashboardSection('threats');});
 const demoAccounts={
  NETRA1001:{holder:'Aarav Mehta',masked:'XXXX XXXX 1001',type:'Savings',bank:'NETRA Demo Bank',branch:'Karwar Demo Branch',ifsc:'DEMO0001001',balance:'₹25,400.00',status:'Active',kyc:'Demo verified'},
  NETRA1002:{holder:'Diya Rao',masked:'XXXX XXXX 1002',type:'Current',bank:'NETRA Demo Bank',branch:'Uttara Kannada Demo Branch',ifsc:'DEMO0001002',balance:'₹58,750.00',status:'Active',kyc:'Demo verified'}
@@ -151,6 +158,20 @@ accountForm.addEventListener('submit',function(e){
 const REPORT_STORAGE_KEY='netraSavedDemoReports';
 function readSavedReports(){try{return JSON.parse(localStorage.getItem(REPORT_STORAGE_KEY)||'[]')}catch(e){return []}}
 function writeSavedReports(reports){try{localStorage.setItem(REPORT_STORAGE_KEY,JSON.stringify(reports));return true}catch(e){return false}}
+function renderThreats(){
+ const list=document.getElementById('threat-list'),reports=readSavedReports(),items=[];
+ reports.forEach(report=>(report.threats||[]).forEach(threat=>items.push({...threat,demoId:report.demoId,createdAt:report.createdAt})));
+ list.innerHTML='';
+ if(!items.length){list.innerHTML='<div class="threat-empty">No flagged transactions found in saved demo reports. Generate an Excel report to run the sample checks.</div>';return;}
+ items.slice().reverse().forEach(item=>{
+  const card=document.createElement('article');card.className='threat-card';
+  const title=document.createElement('h3');title.textContent='Review required · '+item.transactionId;
+  const meta=document.createElement('div');meta.className='threat-meta';meta.textContent='Demo account: '+item.demoId+' · Receiver: '+item.receiver+' · Amount: ₹'+Number(item.amount).toLocaleString('en-IN')+' · Date: '+item.date+' · Risk level: '+item.risk+' · Verification: '+item.verification+' · Reason: '+item.reason;
+  const note=document.createElement('p');note.className='threat-meta';note.textContent='Source: Transaction Verification sheet in '+item.fileName+'. This is a fictional sample flag and must be manually reviewed; it is not proof of fraud.';
+  card.append(title,meta,note);list.append(card);
+ });
+}
+
 function createExcelFile(report){
  let blob,fileName=report.fileName;
  if(window.XLSX){
@@ -232,7 +253,9 @@ document.addEventListener('click',function(e){
   ];
   const verificationRows=[['Transaction ID','Verification status','Demo risk level','Review reason','Suggested next step'],...transactions.map(t=>[t.id,t.verification,t.risk,t.risk==='Medium'?'Sample rule: amount or payee pattern selected for manual review':'No demo rule triggered','Demo only; do not treat as a real fraud decision'])];
   const statementRows=[['NETRA DEMO ACCOUNT STATEMENT'],['Account holder',account.holder],['Masked account',account.masked],['Statement period','02 Nov 2026 – 10 Nov 2026'],['Generated',stamp],[],['Date & time','Description','Credit (INR)','Debit (INR)','Status','Reference ID'],...transactions.map(t=>[t.date,t.note,t.type==='Credit'?t.amount:'',t.type==='Debit'?t.amount:'',t.status,t.reference])];
-  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx',sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Highest Amount Paid':highestPaidRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
+  const fileName='NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx';
+  const threats=transactions.filter(t=>t.status==='Successful'&&(t.risk==='Medium'||t.verification==='Flagged for review')).map(t=>({transactionId:t.id,date:t.date,receiver:t.party,amount:t.amount,risk:t.risk,verification:t.verification,reason:t.note,fileName}));
+  const report={demoId:id,createdAt:stamp,fileName,threats,sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Highest Amount Paid':highestPaidRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
   const saved=readSavedReports();saved.push(report);
   if(!writeSavedReports(saved)){message.textContent='Could not save report in this browser. Browser storage may be full or disabled.';return;}
   createExcelFile(report);message.textContent='Full Excel workbook downloaded and saved in the Reports page. All account and transaction sections are inside the workbook.';
