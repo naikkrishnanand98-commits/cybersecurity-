@@ -212,9 +212,27 @@ document.addEventListener('click',function(e){
   const summaryRows=[['Metric','Value'],['Opening balance (calculated demo value)',openingBalance],['Total successful credits',credits],['Total successful debits',debits],['Pending transaction count',transactions.filter(t=>t.status==='Pending').length],['Failed transaction count',transactions.filter(t=>t.status==='Failed').length],['Transactions flagged for review',transactions.filter(t=>t.verification==='Flagged for review'||t.verification==='Under review').length],['Closing balance (demo account value)',currentBalance],['Currency','INR'],['Period','02 Nov 2026 – 10 Nov 2026']];
   const historyRows=[['Transaction ID','Date & time','Type','Amount (INR)','Payment method','Other party','Description','Transaction status','Reference ID'],...transactions.map(t=>[t.id,t.date,t.type,t.amount,t.method,t.party,t.note,t.status,t.reference])];
   const detailRows=[['Transaction ID','Date & time','Type','Amount (INR)','Payment method','Sender / payer','Receiver / payee','Reference ID','Transaction status','Description'],...transactions.map(t=>[t.id,t.date,t.type,t.amount,t.method,t.type==='Credit'?t.party:account.holder,t.type==='Debit'?t.party:account.holder,t.reference,t.status,t.note])];
+  const receiverTotals={};
+  transactions.filter(t=>t.type==='Debit'&&t.status==='Successful').forEach(t=>{
+   const receiver=t.party;
+   if(!receiverTotals[receiver])receiverTotals[receiver]={count:0,total:0};
+   receiverTotals[receiver].count+=1;
+   receiverTotals[receiver].total+=t.amount;
+  });
+  const rankedReceivers=Object.entries(receiverTotals).map(([receiver,data])=>({receiver,count:data.count,total:data.total})).sort((a,b)=>b.total-a.total);
+  const highestPaidRows=[
+   ['Highest Amount Paid by Receiver'],
+   ['Calculation rule','Successful debit transactions only; pending and failed payments are excluded.'],
+   ['Top receiver',rankedReceivers[0]?.receiver||'No successful payments'],
+   ['Top receiver payment count',rankedReceivers[0]?.count||0],
+   ['Top receiver total paid (INR)',rankedReceivers[0]?.total||0],
+   [],
+   ['Receiver','Number of successful payments','Total amount paid (INR)'],
+   ...rankedReceivers.map(item=>[item.receiver,item.count,item.total])
+  ];
   const verificationRows=[['Transaction ID','Verification status','Demo risk level','Review reason','Suggested next step'],...transactions.map(t=>[t.id,t.verification,t.risk,t.risk==='Medium'?'Sample rule: amount or payee pattern selected for manual review':'No demo rule triggered','Demo only; do not treat as a real fraud decision'])];
   const statementRows=[['NETRA DEMO ACCOUNT STATEMENT'],['Account holder',account.holder],['Masked account',account.masked],['Statement period','02 Nov 2026 – 10 Nov 2026'],['Generated',stamp],[],['Date & time','Description','Credit (INR)','Debit (INR)','Status','Reference ID'],...transactions.map(t=>[t.date,t.note,t.type==='Credit'?t.amount:'',t.type==='Debit'?t.amount:'',t.status,t.reference])];
-  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx',sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
+  const report={demoId:id,createdAt:stamp,fileName:'NETRA_'+id+'_Full_Transaction_Report_'+safeDate+'.xlsx',sheets:{'Account Information':accountRows,'Transaction Summary':summaryRows,'Transaction History':historyRows,'Transaction Details':detailRows,'Highest Amount Paid':highestPaidRows,'Transaction Verification':verificationRows,'Statement':statementRows}};
   const saved=readSavedReports();saved.push(report);
   if(!writeSavedReports(saved)){message.textContent='Could not save report in this browser. Browser storage may be full or disabled.';return;}
   createExcelFile(report);message.textContent='Full Excel workbook downloaded and saved in the Reports page. All account and transaction sections are inside the workbook.';
